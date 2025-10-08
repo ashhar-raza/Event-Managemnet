@@ -1,0 +1,34 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: event_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: event_database
+    ports:
+      - "3307:3306"  # avoid conflict with host MySQL
+    volumes:
+      - ./backend/db/database_backup.sql:/docker-entrypoint-initdb.d/database_backup.sql:ro
+
+  backend:
+    build: ./backend
+    container_name: event_app
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: event_database
+      DB_PORT: 3306
+
+  frontend:
+    build: ./frontend
+    container_name: event_frontend
+    restart: always
+    ports:
+      - "5173:5173"
